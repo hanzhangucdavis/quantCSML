@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from functions import *
+
 #======
 #problems
 #1. NEED false alarm and mis detection calculation
@@ -12,11 +13,11 @@ from functions import *
 
 
 class option:
-    trainingNum = 1000
+    trainingNum = 10000
     subBandNum = 40
     occupyNum = 4
     freqToTimeRatio = 5
-    subBandWidth = 3
+    subBandWidth = 20
     quantifyLevel = 16
     cosetNum = 8
     showPlot = True
@@ -67,8 +68,9 @@ model = tf.keras.Sequential([
 
 
 model.compile(optimizer='adam',
-              loss="MSE",
-              metrics=['accuracy'])
+              loss=combinedLossWrap([1,1]),
+              #loss="MSE",
+              metrics=[detectionMetric])
 
 
 # test_res= model.predict(quantTime)
@@ -84,16 +86,17 @@ model.compile(optimizer='adam',
 # z=np.sum(1*(abs(test_res-support)>0))
 # print(z/support.size)
 
-model.fit(quantTime, support, epochs=50,verbose=0)
+model.fit(quantTime, support, epochs=50,verbose=1)
 
 test_loss, test_acc = model.evaluate(quantTime,  support, verbose=2)
-
+test_loss, test_acc = model.evaluate(quantTime2,  support2, verbose=2)
 
 test_res= model.predict(quantTime2)
 test_res=threshold(test_res,0.5)
 print("error Rate:",errorRate(test_res,support2))
 print("False Alarm:",falseAlarm(test_res,support2))
 print("Mis Detection:",misdetection(test_res,support2))
+print("Detection:",detectionRate(test_res,support2))
 if opt.showPlot:
     plt.figure(4)
     for i in range(0,drawNum):

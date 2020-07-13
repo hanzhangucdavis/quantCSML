@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 def supportGen(Num,Len,ratio):
     #generating support vector as label
     tmp=np.zeros([Num,Len])
@@ -60,10 +61,46 @@ def errorRate(inp1,inp2):
     #all those 3 only works with binary matrices in array form
     return np.sum(1*(abs(inp1-inp2)>0))/inp2.size
 def falseAlarm(inppred,inpori):
+    #how much is wrong in the predicted positives
     totalNum=np.sum(inppred)
     tmp=inpori * inppred
     return 1-np.sum(tmp)/totalNum
 def misdetection(inppred,inpori):
+    #how much is not detected in real positives
+    #this need to be kept low
     totalNum=np.sum(inpori)
     tmp=inpori * inppred
     return 1-np.sum(tmp)/totalNum
+
+def detectionRate(inppred,inpori):
+    tmp=inpori * inppred
+    tmp=np.sum(tmp,axis=-1)
+    tmp=tmp<np.sum(inpori[0,:])
+    tmp=tmp*1
+    tmp=1-tmp
+    return np.sum(tmp)/tmp.size
+def detectionMetric(yt,yp):
+    ypt=tf.keras.backend.round(tf.keras.backend.clip(yp, 0, 1))
+    tmp=yt * ypt
+    tmp=tf.keras.backend.sum(tmp,axis=-1)
+    tmp=tmp<tf.keras.backend.sum(yt[0,:])
+    tmp=tf.keras.backend.cast(tmp,dtype=tf.int32)
+    return 1-tf.keras.backend.sum(tmp)/tf.size(tmp)
+
+def falseAlarmLoss(yt,yp):
+    ypt=tf.keras.backend.round(tf.keras.backend.clip(yp, 0, 1))
+    squared_difference=tf.keras.backend.square(yp*ypt-yt*ypt)
+    return tf.reduce_mean(squared_difference, axis=-1)
+def misDetectionLoss(yt,yp):
+    ytt=yt
+    ypt=ytt*yp
+    squared_difference=tf.keras.backend.square(ypt-ytt)
+    return tf.reduce_mean(squared_difference, axis=-1)
+
+def combinedLoss(yt,yp,weightlst):
+    return weightlst[0]*falseAlarmLoss(yt,yp)+weightlst[1]*misDetectionLoss(yt,yp)
+
+def combinedLossWrap(weightlst):
+    def clhelper(yt,yp):
+        return combinedLoss(yt,yp,weightlst)
+    return clhelper
