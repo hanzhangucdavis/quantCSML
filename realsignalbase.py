@@ -2,31 +2,30 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from functions import *
-
-#======
-#problems
-#1. NEED false alarm and mis detection calculation
-#when the signal is sparse, the NN might choose always output 0
-#2. when the signal becomes LONG, the peak energy becomes extreme, thus making quantify deleating most of the signal
+import time
+#from itertools import combinations #method for generating combination
 
 
 
 
 class option:
-    trainingNum = 10000
+    trainingNum = 102400
     subBandNum = 40
     occupyNum = 4
-    freqToTimeRatio = 5
+    #freqToTimeRatio = 5
     subBandWidth = 20
     quantifyLevel = 16
     cosetNum = 8
-    showPlot = True
-
-
-
+    showPlot = False
+    epochs = 20 #NN training epoch
+    drawNum=3  #draw random curves of generated data
+    divideNum=1 #how many times does verification happens
+    repeatNum=1 #number of nn repetation, more rounds means less variation.
 
 opt=option()
-support, sendTime, cosets,quantTime,quantStair=genData(opt)
+hla=[]
+hlb=[]
+xaxis=[]
 
 
 
@@ -34,75 +33,70 @@ support, sendTime, cosets,quantTime,quantStair=genData(opt)
 
 
 
-support2,d1,d2,quantTime2,d3=genData(opt,cosets)
 
+
+for j in range(1):
+    rat = [0.5,0.5]
+    xaxis.append(0.5)
+
+
+    support, sendTime, cosets,quantTime,quantStair=genData(opt)
+    support2,d1,d2,quantTime2,d3=genData(opt,cosets)
+
+
+    findex=0
+    if opt.showPlot:
+        findex,fhandle,drwo=pltFigureRand(findex, support2, opt.drawNum, opt.trainingNum)
+        findex,dum1,dum2=pltFigureRand(findex, sendTime, opt.drawNum, opt.trainingNum)
+        findex,dum1,dum2=pltFigureRand(findex, quantTime, opt.drawNum, opt.trainingNum)
+
+
+    hl1=[]
+    hl2=[]
+    for i in range(opt.repeatNum):
+        t1=time.time()
+        tf.keras.backend.clear_session()
+        model = tf.keras.Sequential([
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dense(opt.subBandNum)
+        ])
+
+        model.compile(optimizer='adam',
+                      loss=combinedLossWrap([1,1,1]),
+                    # loss="MSE",
+                      metrics=[detectionMetric,misdetectionMetric,falseAlarmMetric])
+        historyva,historytr,model=conductTraining(model,opt,quantTime,support,quantTime2,support2)
+        hl1.append(historytr)
+        hl2.append(historyva)
+        t2=time.time()
+        print(t2-t1)
+    hla.append(hl1)
+    hlb.append(hl2)
+    hlat=np.array(hla)
+    hlbt=np.array(hlb)
+    np.save('trainresult'+time.strftime('%Y%m%d%H'),hlat)
+    np.save('testresult'+time.strftime('%Y%m%d%H'),hlbt)
 
 if opt.showPlot:
-    plt.figure(1)
-    drawNum=3
-    drwo=np.random.randint(0,opt.trainingNum,drawNum)
-    for i in range(0,drawNum):
-        plt.plot(support2[drwo[i],:])
-
-    plt.figure(2)
-    drawNum=3
-    drw=np.random.randint(0,opt.trainingNum,drawNum)
-    for i in range(0,drawNum):
-        plt.plot(sendTime[drw[i],:])
-
-    plt.figure(3)
-    drawNum=3
-    drw=np.random.randint(0,opt.trainingNum,drawNum)
-    for i in range(0,drawNum):
-        plt.plot(quantTime[drw[i],:])
+    findex,dum1,dum2=pltFigureRand(findex, support2, opt.drawNum, opt.trainingNum,drwo)
 
 
 
 
 
 
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(opt.subBandNum)
-])
+
+plt.show()
 
 
-model.compile(optimizer='adam',
-              loss=combinedLossWrap([1,1]),
-              #loss="MSE",
-              metrics=[detectionMetric])
 
+# test_res= model.predict(quantTime2)
+# test_res=threshold(test_res,0.5)
+# print("error Rate:",errorRate(test_res,support2))
+# print("False Alarm:",falseAlarm(test_res,support2))
+# print("Mis Detection:",misdetection(test_res,support2))
+# print("Detection:",detectionRate(test_res,support2))
 
-# test_res= model.predict(quantTime)
-# test_res=1*(test_res>0.5)
-# z=np.sum(1*(abs(test_res-support)>0))
-# print(z/support.size)
-
-# test_res=np.zeros_like(support)
-# z=np.sum(1*(abs(test_res-support)>0))
-# print(z/support.size)
-#
-# test_res=np.zeros_like(support)+1
-# z=np.sum(1*(abs(test_res-support)>0))
-# print(z/support.size)
-
-model.fit(quantTime, support, epochs=50,verbose=1)
-
-test_loss, test_acc = model.evaluate(quantTime,  support, verbose=2)
-test_loss, test_acc = model.evaluate(quantTime2,  support2, verbose=2)
-
-test_res= model.predict(quantTime2)
-test_res=threshold(test_res,0.5)
-print("error Rate:",errorRate(test_res,support2))
-print("False Alarm:",falseAlarm(test_res,support2))
-print("Mis Detection:",misdetection(test_res,support2))
-print("Detection:",detectionRate(test_res,support2))
-if opt.showPlot:
-    plt.figure(4)
-    for i in range(0,drawNum):
-        plt.plot(test_res[drwo[i],:])
-
-    plt.show()
 
 #========
 #Generate support
@@ -114,3 +108,6 @@ if opt.showPlot:
 #Sample
 #========
 #Quantify
+
+
+
