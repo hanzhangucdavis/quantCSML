@@ -3,6 +3,7 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from itertools import combinations #method for generating combination
 def conductTraining(model,opt,quantTimeTrain,supportTrain,quantTimeTest,supportTest):
     perep = int(opt.epochs / opt.divideNum)
     historytr = []
@@ -12,10 +13,10 @@ def conductTraining(model,opt,quantTimeTrain,supportTrain,quantTimeTest,supportT
     #test_loss, test_acc = model.evaluate(quantTimeTest, supportTest, verbose=2)
     #historyva.append([test_loss, test_acc])
     for i in range(opt.divideNum):
-        model.fit(quantTimeTrain, supportTrain, epochs=perep, verbose=1,shuffle=1)
-        test_loss, test_acc,test_mis,test_fal = model.evaluate(quantTimeTrain, supportTrain, verbose=2)
+        model.fit(quantTimeTrain, supportTrain, epochs=perep, verbose=1,shuffle=1,batch_size=opt.batch_size)
+        test_loss, test_acc,test_mis,test_fal = model.evaluate(quantTimeTrain, supportTrain, verbose=2,batch_size=opt.batch_size)
         historytr.append([test_loss, test_acc,test_mis,test_fal])
-        test_loss, test_acc,test_mis,test_fal = model.evaluate(quantTimeTest, supportTest, verbose=2)
+        test_loss, test_acc,test_mis,test_fal = model.evaluate(quantTimeTest, supportTest, verbose=2,batch_size=opt.batch_size)
         historyva.append([test_loss, test_acc,test_mis,test_fal])
     return historyva,historytr,model
 def conductTrainingCrossentropy(model,opt,quantTimeTrain,supportTrain,quantTimeTest,supportTest):
@@ -23,7 +24,7 @@ def conductTrainingCrossentropy(model,opt,quantTimeTrain,supportTrain,quantTimeT
     historytr = []
     historyva = []
     for i in range(opt.divideNum):
-        model.fit(quantTimeTrain, supportTrain, epochs=perep, verbose=1,batch_size=1024)
+        model.fit(quantTimeTrain, supportTrain, epochs=perep, verbose=1,batch_size=opt.batch_size)
         #test_loss, test_acc= model.evaluate(quantTimeTrain, supportTrain, verbose=2)
         #historytr.append([test_loss, test_acc])
         #test_loss, test_acc = model.evaluate(quantTimeTest, supportTest, verbose=2)
@@ -56,6 +57,14 @@ def quantify(input,quant):
     # use average energy to quantify signal
     if quant<0:
         return input,0
+    if quant==0:
+        stair = 2 * np.power(np.average(np.power(input, 2)), 0.5)/5
+        t1=1*(input>stair)
+        t2 = 1 * (input < -stair)
+        tmp=np.zeros_like(input)
+        tmp+=t1
+        tmp-=t2
+        return tmp,0
     stair=2*np.power(np.average(np.power(input,2)),0.5)/(quant)
     tmp=(input/stair).astype(np.int32)
     tmp = np.clip(tmp,-quant,quant)
@@ -85,6 +94,17 @@ def genData(a,cosets=None):
     recTime = mulCoset(sendTime, cosets)
     quantTime, quantStair = quantify(recTime, a.quantifyLevel)
     return support, sendTime, cosets,quantTime,quantStair
+def genTrainingList(opt):
+    try:
+        ret=np.loadtxt(opt.pathToData)
+    except:
+        z = list(combinations(range(opt.subBandNum), opt.occupyNum))
+        z = np.array(z)
+        ret = np.zeros([z.shape[0], opt.subBandNum])
+        for i in range(z.shape[0]):
+            ret[i, z[i]] += 1
+        np.savetxt('C'+str(opt.subBandNum)+'_'+str(opt.occupyNum)+'vector.txt',ret)
+    return ret
 def loadData(a,supbase,cosets=None):
     if cosets is None:
         siz=a.trainingNum
@@ -172,9 +192,17 @@ def misDetectionLoss(yt,yp):
     return tf.reduce_mean(squared_difference, axis=-1)
 
 def combinedLoss(yt,yp,weightlst):
-    return weightlst[0]*falseAlarmLoss(yt,yp)+weightlst[1]*misDetectionLoss(yt,yp)+weightlst[2]*numLoss(yt,yp)
+    return weightlst[0]*falseAlarmLoss(yt,yp)+weightlst[1]*misDetectionLoss(yt,yp)+weightlst[2]*tf.keras.losses.mean_squared_error(yt,yp)
 
 def combinedLossWrap(weightlst):
     def clhelper(yt,yp):
         return combinedLoss(yt,yp,weightlst)
     return clhelper
+
+def shrinksup(support):
+    numsupport=support.shape[1]
+    newnum=int(numsupport/2)
+    newsupport=np.zeros([support.shape[0],newnum])
+    for i in range(newnum):
+        newsupport[:,i]=np.max(support[:,i*2:i*2+2],axis=1)
+    return newsupport
