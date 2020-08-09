@@ -10,18 +10,18 @@ import time
 
 class option:
     trainingNum = 102400
-    subBandNum = 40
+    subBandNum = 10
     occupyNum = 4
     #freqToTimeRatio = 5
-    subBandWidth = 5
-    quantifyLevel = 0
+    subBandWidth = 20
+    quantifyLevel = 16
     cosetNum = 8
     showPlot = False
-    epochs = 20 #NN training epoch
+    epochs = 10 #NN training epoch
     drawNum=3  #draw random curves of generated data
     divideNum=1 #how many times does verification happens
     repeatNum=1 #number of nn repetation, more rounds means less variation.
-    batch_size=1024
+    batch_size=128
 opt=option()
 hla=[]
 hlb=[]
@@ -61,7 +61,7 @@ for j in range(3):
         ])
 
         model.compile(optimizer='adam',
-                      loss=combinedLossWrap([1,1,0]),
+                      loss=combinedLossWrap([0.5,0.5,0]),
                       #loss="MSE",
                       metrics=[detectionMetric,misdetectionMetric,falseAlarmMetric])
         historyva,historytr,model=conductTraining(model,opt,quantTime,support,quantTime2,support2)

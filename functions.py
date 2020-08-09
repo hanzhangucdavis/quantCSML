@@ -153,10 +153,18 @@ def pltFigureRand(ind,data,drawNum,trainingNum,givenindex=None):
     for i in range(0,drawNum):
         plt.plot(data[givenindex[i],:])
     return ind+1,z,givenindex
-def detectionRate(inppred,inpori):
+def detectionRateOld(inppred,inpori):
     tmp=inpori * inppred
     tmp=np.sum(tmp,axis=-1)
     tmp=tmp<np.sum(inpori[0,:])
+    tmp=tmp*1
+    tmp=1-tmp
+    return np.sum(tmp)/tmp.size
+def detectionRate(inppred,inpori):
+    tmp=inpori - inppred
+    tmp=np.clip(tmp,0,1)
+    tmp=np.sum(tmp,axis=-1)
+    tmp=tmp>0
     tmp=tmp*1
     tmp=1-tmp
     return np.sum(tmp)/tmp.size

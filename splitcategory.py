@@ -18,7 +18,7 @@ class option:
     quantifyLevel = 16
     cosetNum = 8
     showPlot = False
-    epochs = 2 #NN training epoch
+    epochs = 10 #NN training epoch
     drawNum=3  #draw random curves of generated data
     divideNum=1 #how many times does verification happens
     repeatNum=1 #number of nn repetation, more rounds means less variation.
@@ -27,7 +27,6 @@ class option:
     batch_size=128
 
 opt=option()
-
 if tf.test.is_gpu_available():
     opt.batch_size=10240
 hla=[]
@@ -61,23 +60,25 @@ for j in range(1):
     hl2=[]
     for i in range(opt.repeatNum):
         t1=time.time()
-        tf.keras.backend.clear_session()
-        model = tf.keras.Sequential([
-            tf.keras.layers.Dense(128, activation='relu'),
-            tf.keras.layers.Dense(64,activation='relu'),
-            tf.keras.layers.Dense(91930)
-        ])
+        predlist=[]
+        for k in range(opt.subBandNum):
+            tf.keras.backend.clear_session()
+            model = tf.keras.Sequential([
+                tf.keras.layers.Dense(128, activation='relu'),
+                tf.keras.layers.Dense(64,activation='relu'),
+                tf.keras.layers.Dense(2,activation='softmax')
+            ])
 
-        model.compile(optimizer='adam',
-                      loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                    # loss="MSE",
-                      metrics=['accuracy'])
-        historyva,historytr,model=conductTrainingCrossentropy(model,opt,quantTime,indextr,quantTime2,indexte)
-        pred=model.predict(quantTime2)
-        pred=np.argmax(pred,-1)
-        subbase=np.loadtxt(opt.pathToData)
-        predres=subbase[pred,:]
-        realres=subbase[indexte,:]
+            model.compile(optimizer='adam',
+                          loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                        # loss="MSE",
+                          metrics=['accuracy'])
+            historyva,historytr,model=conductTrainingCrossentropy(model,opt,quantTime,support[:,k],quantTime2,support2[:,k])
+            pred=model.predict(quantTime2)
+            pred=np.argmax(pred,-1)
+            predlist.append(pred)
+        predres=np.stack(predlist,axis=-1)
+        realres=support2
         err=errorRate(predres,realres)
         fal = falseAlarm(predres, realres)
         mis = misdetection(predres, realres)

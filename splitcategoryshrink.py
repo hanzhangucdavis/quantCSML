@@ -3,13 +3,14 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from functions import *
 import time
-
+#from itertools import combinations #method for generating combination
 
 
 
 
 class option:
     trainingNum = 102400
+    testingNum = 10000
     subBandNum = 40
     occupyNum = 8
     #freqToTimeRatio = 5
@@ -17,27 +18,28 @@ class option:
     quantifyLevel = 16
     cosetNum = 16
     showPlot = False
-    epochs = 20 #NN training epoch
+    epochs = 10 #NN training epoch
     drawNum=3  #draw random curves of generated data
     divideNum=1 #how many times does verification happens
     repeatNum=1 #number of nn repetation, more rounds means less variation.
-    batch_size=1024
+    pathToData='C40_4vector.txt'
+    supflag = False
+    batch_size=128
 
 opt=option()
+if tf.test.is_gpu_available():
+    opt.batch_size=10240
 hla=[]
 hlb=[]
 xaxis=[]
 
+if opt.supflag:
+    supbase=genTrainingList(opt)
+
 support, sendTime, cosets, quantTime, quantStair = genData(opt)
 support2, d1, d2, quantTime2, d3 = genData(opt, cosets)
-
 for j in range(3):
-    #xaxis.append(0.5)
-
-
-
-
-
+    xaxis.append(0.5)
     findex=0
     if opt.showPlot:
         findex,fhandle,drwo=pltFigureRand(findex, support2, opt.drawNum, opt.trainingNum)
@@ -49,19 +51,31 @@ for j in range(3):
     hl2=[]
     for i in range(opt.repeatNum):
         t1=time.time()
-        tf.keras.backend.clear_session()
-        model = tf.keras.Sequential([
-            tf.keras.layers.Dense(128, activation='relu'),
-            tf.keras.layers.Dense(opt.subBandNum)
-        ])
+        predlist=[]
+        for k in range(opt.subBandNum):
+            tf.keras.backend.clear_session()
+            model = tf.keras.Sequential([
+                tf.keras.layers.Dense(128, activation='relu'),
+                tf.keras.layers.Dense(64,activation='relu'),
+                tf.keras.layers.Dense(2,activation='softmax')
+            ])
 
-        model.compile(optimizer='adam',
-                      loss=combinedLossWrap([0.5,0.5,0]),
-                      #loss="MSE",
-                      metrics=[detectionMetric,misdetectionMetric,falseAlarmMetric])
-        historyva,historytr,model=conductTraining(model,opt,quantTime,support,quantTime2,support2)
+            model.compile(optimizer='adam',
+                          loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                        # loss="MSE",
+                          metrics=['accuracy'])
+            historyva,historytr,model=conductTrainingCrossentropy(model,opt,quantTime,support[:,k],quantTime2,support2[:,k])
+            pred=model.predict(quantTime2)
+            pred=np.argmax(pred,-1)
+            predlist.append(pred)
+        predres=np.stack(predlist,axis=-1)
+        realres=support2
+        err=errorRate(predres,realres)
+        fal = falseAlarm(predres, realres)
+        mis = misdetection(predres, realres)
+        det = detectionRate(predres, realres)
         hl1.append(historytr)
-        hl2.append(historyva)
+        hl2.append([err,fal,mis,det])
         t2=time.time()
         print(t2-t1)
     hla.append(hl1)
@@ -70,14 +84,15 @@ for j in range(3):
     hlbt=np.array(hlb)
     np.save('trainresult'+time.strftime('%Y%m%d%H'),hlat)
     np.save('testresult'+time.strftime('%Y%m%d%H'),hlbt)
-
-
-
     support=shrinksup(support)
     support2=shrinksup(support2)
     #part to shrink
     opt.subBandNum=int(opt.subBandNum/2)
 
+if opt.showPlot:
+    findex,dum1,dum2=pltFigureRand(findex, support2, opt.drawNum, opt.trainingNum,drwo)
+print(hlat)
+print(hlbt)
 
 
 
@@ -86,8 +101,7 @@ for j in range(3):
 
 plt.show()
 
-print(hlat)
-print(hlbt)
+
 
 # test_res= model.predict(quantTime2)
 # test_res=threshold(test_res,0.5)
