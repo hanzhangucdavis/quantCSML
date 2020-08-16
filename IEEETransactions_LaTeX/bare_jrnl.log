@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7250 64-bit) (preloaded format=pdflatex 2020.1.28)  10 AUG 2020 15:15
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7250 64-bit) (preloaded format=pdflatex 2020.1.28)  12 AUG 2020 17:01
 entering extended mode
 **./bare_jrnl.tex
 (bare_jrnl.tex
@@ -123,21 +123,21 @@ LaTeX Font Info:    ... okay on input line 353.
 
 -- Lines per column: 32 (exact).
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 441.
+(Font)              <7> on input line 443.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 441.
-** ATTENTION: \IEEEPARstart is disabled in draft mode (line 477).
+(Font)              <5> on input line 443.
+** ATTENTION: \IEEEPARstart is disabled in draft mode (line 479).
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 478.
+(Font)              <12> on input line 480.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 478.
+(Font)              <8> on input line 480.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 478.
-[1{C:/Users/caido/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
+(Font)              <6> on input line 480.
+[1{C:/Users/caido/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <9> on input line 667.
- [2]
-(bare_jrnl.aux) ) 
+(Font)              <9> on input line 699.
+
+[3] [4] (bare_jrnl.aux) ) 
 Here is how much of TeX's memory you used:
  1075 strings out of 492482
  19504 string characters out of 3131025
@@ -145,14 +145,14 @@ Here is how much of TeX's memory you used:
  5474 multiletter control sequences out of 15000+200000
  43864 words of font info for 79 fonts, out of 3000000 for 9000
  1144 hyphenation exceptions out of 8191
- 27i,8n,28p,207b,214s stack positions out of 5000i,500n,10000p,200000b,50000s
-{D:/Program Files/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc}<C:/U
-sers/caido/AppData/Roaming/MiKTeX/2.9/fonts/type1/urw/times/utmb8a.pfb><C:/User
-s/caido/AppData/Roaming/MiKTeX/2.9/fonts/type1/urw/times/utmr8a.pfb><C:/Users/c
-aido/AppData/Roaming/MiKTeX/2.9/fonts/type1/urw/times/utmri8a.pfb>
-Output written on bare_jrnl.pdf (2 pages, 45331 bytes).
+ 27i,8n,28p,631b,214s stack positions out of 5000i,500n,10000p,200000b,50000s
+{D:/Program Files/MiKTeX 2.9/fonts/enc/dvips/base/8r.e
+nc}<C:/Users/caido/AppData/Roaming/MiKTeX/2.9/fonts/type1/urw/times/utmb8a.pfb>
+<C:/Users/caido/AppData/Roaming/MiKTeX/2.9/fonts/type1/urw/times/utmr8a.pfb><C:
+/Users/caido/AppData/Roaming/MiKTeX/2.9/fonts/type1/urw/times/utmri8a.pfb>
+Output written on bare_jrnl.pdf (4 pages, 50343 bytes).
 PDF statistics:
- 22 PDF objects out of 1000 (max. 8388607)
+ 28 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

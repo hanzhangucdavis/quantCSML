@@ -358,7 +358,7 @@
 % not capitalized unless they are the first or last word of the title.
 % Linebreaks \\ can be used within to get better formatting as desired.
 % Do not put math or special symbols in the title.
-\title{Bare Demo of IEEEtran.cls\\ for IEEE Journals}
+\title{Compressive Sensing over Quantified Input via Machine Learning}
 %
 %
 % author names and IEEE memberships
@@ -433,7 +433,9 @@ GA, 30332 USA e-mail: (see http://www.michaelshell.org/contact.html).}% <-this %
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
 \begin{abstract}
-The abstract goes here.
+NEED to be kept in 75-200 words. The number of pages cannot exceed30, but only 10 pages are free.
+
+Compressive sensing (CS) is a technique frequently adopted in telecommunication area. The application of CS could be found in subareas such as software defined radio, cognitive radio and internet of things. By adopting CS, the receiver could sense the channel with weaker analog to digital converter. Although there are already many research focused on CS, doing CS with quantified input is still an open question. By adopting Machine Learning (ML) techniques, we offer an answer to spectral sensing with multi-Coset sampling scheme. Comparison with traditional methods are shown and its properties are analyzed.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
@@ -477,9 +479,17 @@ IEEE, IEEEtran, journal, \LaTeX, paper, template.
 \IEEEPARstart{T}{his} demo file is intended to serve as a ``starter file''
 for IEEE journal papers produced under \LaTeX\ using
 IEEEtran.cls version 1.8b and later.
+
+
+Introduce CS. Insert the history, application of CS.
+Show that different from the CS in image, the CS in telecom must obey the limitation of hardware.
+Introduce quantification and multicoset.
+Show that spectrum sensing's information requirement, unlike signal recovery, is not as well-defined.
+Introduce ML, show that it could be an alternative for optimization based methods.
+Present the structure of the paper.
 % You must have at least 2 lines in the paragraph with the drop letter
 % (should never be an issue)
-I wish you the best of success.
+
 
 \hfill mds
  
@@ -590,7 +600,29 @@ Subsubsection text here.
 % \fnbelowfloat command of the stfloats package.
 
 
+\section{System model}
+\subsection{MultiCoset}
+Show the multicoset model we used.
+\subsection{Machine Learning model}
+Show the ML model we adopted. Show the losses we tested. 
+Could include split end as an attemptation to reduce the complexity.
+\subsection{divide and conquer tactic}
+Show that ML scalability issue.
+Introduce dividing technique.
+Showing that ML could work even on not so sparce signals.
 
+
+\section{Simulation Results}
+\subsection{Environment setting}
+Show the simulation background, and the comparison algorithm
+\subsection{loss}
+Show The comparison of different losses
+\subsection{SNR}
+Show the comparison among different SNR.
+\subsection{cosets and occupied channels}
+Show the comparison under different parameters
+\subsection{divide and conquer}
+Show the results on divide and conquer
 
 \section{Conclusion}
 The conclusion goes here.

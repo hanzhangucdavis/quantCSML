@@ -1,0 +1,15 @@
+102400/102400 - 2s - loss: 0.0765 - detectionMetric: 0.4436 - misdetectionMetric: 0.1339 - falseAlarmMetric: 0.3804
+102400/102400 - 1s - loss: 0.0767 - detectionMetric: 0.4437 - misdetectionMetric: 0.1338 - falseAlarmMetric: 0.3814
+51.3141393661499
+
+40-8-8-5
+
+102400/102400 - 1s - loss: 0.0327 - detectionMetric: 0.9545 - misdetectionMetric: 0.0081 - falseAlarmMetric: 0.0925
+102400/102400 - 1s - loss: 0.0328 - detectionMetric: 0.9523 - misdetectionMetric: 0.0084 - falseAlarmMetric: 0.0927
+50.427738189697266
+20-8-8-10
+
+102400/102400 - 2s - loss: 5.7419e-04 - detectionMetric: 1.0000 - misdetectionMetric: 0.0000e+00 - falseAlarmMetric: 0.0000e+00
+102400/102400 - 1s - loss: 0.0012 - detectionMetric: 1.0000 - misdetectionMetric: 0.0000e+00 - falseAlarmMetric: 0.0000e+00
+52.13655114173889
+10-8-8-20

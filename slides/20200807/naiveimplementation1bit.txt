@@ -1,0 +1,5 @@
+102400/102400 - 2s - loss: 0.0433 - detectionMetric: 0.6427 - misdetectionMetric: 0.1179 - falseAlarmMetric: 0.4104
+102400/102400 - 2s - loss: 0.0436 - detectionMetric: 0.6367 - misdetectionMetric: 0.1202 - falseAlarmMetric: 0.4123
+54.01253700256348
+
+40-8-8-5

@@ -1,0 +1,4 @@
+[err,fal,mis,det])
+[[3.7450e-04 1.8725e-03 1.8725e-03 9.9589e-01]]
+
+4 bit quantization

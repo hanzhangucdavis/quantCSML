@@ -1,0 +1,38 @@
+102400/102400 - 2s - loss: 4.8503e-05 - detectionMetric: 1.0000 - misdetectionMetric: 0.0000e+00 - falseAlarmMetric: 0.0000e+00
+102400/102400 - 2s - loss: 4.8294e-05 - detectionMetric: 1.0000 - misdetectionMetric: 0.0000e+00 - falseAlarmMetric: 0.0000e+00
+54.7942271232605
+
+10-8-10
+
+102400/102400 - 2s - loss: 1.3344e-06 - detectionMetric: 1.0000 - misdetectionMetric: 0.0000e+00 - falseAlarmMetric: 0.0000e+00
+102400/102400 - 1s - loss: 1.3256e-06 - detectionMetric: 1.0000 - misdetectionMetric: 0.0000e+00 - falseAlarmMetric: 0.0000e+00
+51.712730169296265
+
+10-8-8
+
+102400/102400 - 2s - loss: 0.0167 - detectionMetric: 0.9890 - misdetectionMetric: 0.0015 - falseAlarmMetric: 0.0568
+102400/102400 - 1s - loss: 0.0172 - detectionMetric: 0.9889 - misdetectionMetric: 0.0015 - falseAlarmMetric: 0.0582
+55.26379179954529
+
+20-8-10
+
+102400/102400 - 2s - loss: 0.0583 - detectionMetric: 0.8393 - misdetectionMetric: 0.0287 - falseAlarmMetric: 0.1641
+102400/102400 - 1s - loss: 0.0589 - detectionMetric: 0.8382 - misdetectionMetric: 0.0290 - falseAlarmMetric: 0.1654
+57.15413451194763
+
+20-8-8
+
+102400/102400 - 2s - loss: 0.0919 - detectionMetric: 0.2848 - misdetectionMetric: 0.1908 - falseAlarmMetric: 0.4277
+102400/102400 - 2s - loss: 0.0922 - detectionMetric: 0.2819 - misdetectionMetric: 0.1916 - falseAlarmMetric: 0.4288
+58.45883750915527
+
+40-8-10
+
+102400/102400 - 2s - loss: 0.0912 - detectionMetric: 0.2509 - misdetectionMetric: 0.2054 - falseAlarmMetric: 0.4204
+102400/102400 - 1s - loss: 0.0915 - detectionMetric: 0.2519 - misdetectionMetric: 0.2052 - falseAlarmMetric: 0.4212
+57.10976028442383
+
+40-8-8
+
+Realized that the length on frequency is not the same
+
