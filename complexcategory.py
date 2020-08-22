@@ -9,16 +9,16 @@ import time
 
 
 class option:
-    trainingNum = 1024
+    trainingNum = 102400
     testingNum = 1000
     subBandNum = 10
     occupyNum = 2
     #freqToTimeRatio = 5
-    subBandWidth = 3
-    quantifyLevel = 0
-    cosetNum = 1
+    subBandWidth = 20
+    quantifyLevel = -1
+    cosetNum = 5
     showPlot = False
-    epochs = 80 #NN training epoch
+    epochs = 50 #NN training epoch
     drawNum=3  #draw random curves of generated data
     divideNum=1 #how many times does verification happens
     repeatNum=1 #number of nn repetation, more rounds means less variation.
@@ -26,6 +26,12 @@ class option:
     pathToTrainingi='x_i.csv'
     pathToTrainingr='x_r.csv'
     pathToSupport='support.csv'
+    pathToIndex='indexlist.txt'
+    pathToTrainingite='x_ite.csv'
+    pathToTrainingrte='x_rte.csv'
+    pathToSupportte='supportte.csv'
+    pathToIndexte='indexlistte.csv'
+    pathToStageList='stagelist.csv'
     supflag = True
     batch_size=128
 
@@ -37,41 +43,80 @@ hla=[]
 hlb=[]
 xaxis=[]
 
-if opt.supflag:
-    supbase=genTrainingList(opt)
-    basedict = {}
-    for i in range(supbase.shape[0]):
-        basedict[str(supbase[i, :])] = i
-    supportlst=np.loadtxt(opt.pathToSupport,delimiter=',')
-    sendTimelsti=np.loadtxt(opt.pathToTrainingi,delimiter=',')
-    sendTimelstr=np.loadtxt(opt.pathToTrainingr,delimiter=',')
-    indexlist=np.zeros([supportlst.shape[0],1])
-    for i in range(supportlst.shape[0]):
-        indexlist[i]=basedict[str(supportlst[i])]
-for j in range(1):
-    xaxis.append(0.5)
 
-    tmp=np.random.randint(0,sendTimelsti.shape[0],opt.trainingNum)
-    support=supportlst[tmp,:]
-    sendTimei=sendTimelsti[tmp,:]
-    sendTimer = sendTimelstr[tmp, :]
-    cosets = generateCosets(int(sendTimei.shape[1] / 3), opt.cosetNum, 3)
+#===================================
+#=Script of generating training data
+
+# addressPrefix = 'training_set/signal_'
+# addressTails = '/support.csv'
+# addressTailxi = '/xt.csv'
+# addressTailxr = '/xr.csv'
+# supportlst = np.zeros([100, opt.subBandNum])
+# sendTimelsti = np.zeros([100, opt.subBandNum * opt.subBandWidth])
+# sendTimelstr = np.zeros([100, opt.subBandNum * opt.subBandWidth])
+# for signalNum in range(1, 11):
+#     address = addressPrefix + str(signalNum) + addressTails
+#     tmp = np.loadtxt(address, delimiter=',')
+#     supportlst = np.concatenate([supportlst, tmp], axis=0)
+#     address = addressPrefix + str(signalNum) + addressTailxi
+#     tmp = np.loadtxt(address, delimiter=',')
+#     sendTimelsti = np.concatenate([sendTimelsti, tmp], axis=0)
+#     address = addressPrefix + str(signalNum) + addressTailxr
+#     tmp = np.loadtxt(address, delimiter=',')
+#     sendTimelstr = np.concatenate([sendTimelstr, tmp], axis=0)
+#
+# supbase = np.loadtxt('C10_avector.txt')
+# basedict = {}
+# for i in range(supbase.shape[0]):
+#     basedict[str(supbase[i, :])] = i
+#
+# indexlist = np.zeros([supportlst.shape[0], 1])
+# for i in range(supportlst.shape[0]):
+#     indexlist[i] = basedict[str(supportlst[i])]
+
+
+
+
+if opt.supflag:
+
+    supportlst=np.loadtxt(opt.pathToSupport)
+    sendTimelsti=np.loadtxt(opt.pathToTrainingi)
+    sendTimelstr=np.loadtxt(opt.pathToTrainingr)
+    supbase = np.loadtxt('C10_avector.txt')
+    #basedict = {}
+    #for i in range(supbase.shape[0]):
+        #basedict[str(supbase[i, :])] = i
+    indexlist=np.loadtxt(opt.pathToIndex)
+
+    supportlstte=np.loadtxt(opt.pathToSupportte)
+    sendTimelstite=np.loadtxt(opt.pathToTrainingite)
+    sendTimelstrte=np.loadtxt(opt.pathToTrainingrte)
+    indexlistte=np.loadtxt(opt.pathToIndexte)
+    stageList=np.loadtxt(opt.pathToStageList)
+    stageList=np.array([0]+list(range(100,10101,1000))) #override
+
+
+for cosetNum in range(1,10):
+    opt.cosetNum=cosetNum
+    support=supportlst
+    sendTimei=sendTimelsti
+    sendTimer = sendTimelstr
+    cosets = generateCosets(opt.subBandNum, opt.cosetNum, opt.subBandWidth)
     recTimei = mulCoset(sendTimei, cosets)
     recTimer = mulCoset(sendTimer, cosets)
     recTime=np.concatenate([recTimer,recTimei],axis=1)
     quantTime, quantStair = quantify(recTime, opt.quantifyLevel)
-    indextr= indexlist[tmp]
+    indextr= indexlist
 
 
-    tmp=np.random.randint(0,sendTimelsti.shape[0],opt.testingNum)
-    support2=supportlst[tmp,:]
-    sendTimei2=sendTimelsti[tmp,:]
-    sendTimer2 = sendTimelstr[tmp, :]
+    support2=supportlstte
+    sendTimei2=sendTimelstite
+    sendTimer2 = sendTimelstrte
     recTimei2 = mulCoset(sendTimei2, cosets)
     recTimer2 = mulCoset(sendTimer2, cosets)
     recTime2=np.concatenate([recTimer2,recTimei2],axis=1)
     quantTime2, quantStair = quantify(recTime2, opt.quantifyLevel)
-    indexte= indexlist[tmp]
+    indexte= indexlist
 
 
 
@@ -80,7 +125,7 @@ for j in range(1):
     findex=0
     if opt.showPlot:
         findex,fhandle,drwo=pltFigureRand(findex, support2, opt.drawNum, opt.trainingNum)
-        findex,dum1,dum2=pltFigureRand(findex, sendTime, opt.drawNum, opt.trainingNum)
+        findex,dum1,dum2=pltFigureRand(findex, sendTimei, opt.drawNum, opt.trainingNum)
         findex,dum1,dum2=pltFigureRand(findex, quantTime, opt.drawNum, opt.trainingNum)
 
 
@@ -92,7 +137,7 @@ for j in range(1):
         model = tf.keras.Sequential([
             tf.keras.layers.Dense(128, activation='relu'),
             tf.keras.layers.Dense(64,activation='relu'),
-            tf.keras.layers.Dense(91930)
+            tf.keras.layers.Dense(supbase.shape[0])
         ])
 
         model.compile(optimizer='adam',
@@ -104,24 +149,33 @@ for j in range(1):
         pred=np.argmax(pred,-1)
         predres=supbase[pred,:]
         realres=support2
-        err=errorRate(predres,realres)
-        fal = falseAlarm(predres, realres)
-        mis = misdetection(predres, realres)
-        det = detectionRate(predres, realres)
-        hl1.append(historytr)
+        err=[]
+        fal=[]
+        mis=[]
+        det=[]
+        for k in range(0,11):
+            ran=range(stageList[k],stageList[k+1])
+            errt = errorRate(predres[ran,:],realres[ran,:])
+            falt = falseAlarm(predres[ran,:], realres[ran,:])
+            mist = misdetection(predres[ran,:], realres[ran,:])
+            dett = detectionRate(predres[ran,:], realres[ran,:])
+            err.append(errt)
+            fal.append(falt)
+            mis.append(mist)
+            det.append(dett)
+        #need to add evaluation for different num of signals
         hl2.append([err,fal,mis,det])
         t2=time.time()
         print(t2-t1)
-    hla.append(hl1)
     hlb.append(hl2)
-    hlat=np.array(hla)
     hlbt=np.array(hlb)
-    np.save('trainresult'+time.strftime('%Y%m%d%H'),hlat)
     np.save('testresult'+time.strftime('%Y%m%d%H'),hlbt)
+
+
+        #test
 
 if opt.showPlot:
     findex,dum1,dum2=pltFigureRand(findex, support2, opt.drawNum, opt.trainingNum,drwo)
-print(hlat)
 print(hlbt)
 
 
