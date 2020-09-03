@@ -6,6 +6,7 @@
       <excludePattern pattern="*.npy" />
       <excludePattern pattern="*.zip" />
       <excludePattern pattern="*.rar" />
+      <excludePattern pattern="*.h5" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

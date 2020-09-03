@@ -1,0 +1,2 @@
+model_checkpoint_path: "modelSNR-10coset1.h"
+all_model_checkpoint_paths: "modelSNR-10coset1.h"

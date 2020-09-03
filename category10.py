@@ -16,7 +16,7 @@ class option:
     #freqToTimeRatio = 5
     subBandWidth = 20
     quantifyLevel = 16
-    cosetNum = 4
+    cosetNum = 9
     showPlot = False
     epochs = 15 #NN training epoch
     drawNum=3  #draw random curves of generated data
