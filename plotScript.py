@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
 
-z=np.load('testresult2020090218.npy')
+z=np.load('testresultnewmetric.npy')
 #test_loss, test_det,test_mis,test_fal
 z=np.average(z,axis=1)
 xaxis=np.array(range(4,12))

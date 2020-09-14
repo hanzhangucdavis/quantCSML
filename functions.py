@@ -136,6 +136,11 @@ def errorRate(inp1,inp2):
     #all those 3 only works with binary matrices in array form
     return np.sum(1*(abs(inp1-inp2)>0))/inp2.size
 def falseAlarm(inppred,inpori):
+    #fake positive num/all negative num
+    totalNum=np.sum(1-inpori)
+    tmp=np.sum(inppred)-np.sum(inpori * inppred)
+    return tmp/totalNum
+def falseAlarmOld(inppred,inpori):
     #how much is wrong in the predicted positives
     totalNum=np.sum(inppred)
     tmp=inpori * inppred
@@ -153,14 +158,7 @@ def pltFigureRand(ind,data,drawNum,trainingNum,givenindex=None):
     for i in range(0,drawNum):
         plt.plot(data[givenindex[i],:])
     return ind+1,z,givenindex
-def detectionRateOld(inppred,inpori):
-    tmp=inpori * inppred
-    tmp=np.sum(tmp,axis=-1)
-    tmp=tmp<np.sum(inpori[0,:])
-    tmp=tmp*1
-    tmp=1-tmp
-    return np.sum(tmp)/tmp.size
-def detectionRate(inppred,inpori):
+def detectionRateold2(inppred,inpori):
     tmp=inpori - inppred
     tmp=np.clip(tmp,0,1)
     tmp=np.sum(tmp,axis=-1)
@@ -168,6 +166,20 @@ def detectionRate(inppred,inpori):
     tmp=tmp*1
     tmp=1-tmp
     return np.sum(tmp)/tmp.size
+    #number of covered detection/all tests
+def detectionRateOld(inppred,inpori):
+    #number of covered detection/all tests, bad implementation
+    tmp=inpori * inppred
+    tmp=np.sum(tmp,axis=-1)
+    tmp=tmp<np.sum(inpori[0,:])
+    tmp=tmp*1
+    tmp=1-tmp
+    return np.sum(tmp)/tmp.size
+def detectionRate(inppred,inpori):
+    #true positive/all positive
+    totalNum=np.sum(inpori)
+    tmp=np.sum(inpori * inppred)
+    return np.sum(tmp)/totalNum
 def detectionMetric(yt,yp):
     ypt=tf.keras.backend.round(tf.keras.backend.clip(yp, 0, 1))
     tmp=yt * ypt

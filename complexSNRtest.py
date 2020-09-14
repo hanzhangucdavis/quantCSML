@@ -18,10 +18,10 @@ class option:
     quantifyLevel = -1
     cosetNum = 5
     showPlot = False
-    epochs = 50 #NN training epoch
+    epochs = 5 #NN training epoch
     drawNum=3  #draw random curves of generated data
     divideNum=1 #how many times does verification happens
-    repeatNum=30 #number of nn repetation, more rounds means less variation.
+    repeatNum=1 #number of nn repetation, more rounds means less variation.
     pathToData='C10_2vector.txt'
     pathToTrainingi='x_i.csv'
     pathToTrainingr='x_r.csv'
@@ -38,7 +38,7 @@ class option:
 opt=option()
 
 if tf.test.is_gpu_available():
-    opt.batch_size=521
+    opt.batch_size=10240
 
 xaxis=[]
 
@@ -47,23 +47,28 @@ sigNumList=[1,2,3,4,5,6,7,8,9,10]
 
 parameterPack=np.meshgrid([1,2,3],[SNRList])
 hla=[]
-for SNR in SNRList:
+testroot=[]
+
+addressPrefix = 'noisy_data_testing/snr'
+addressTails = '/support.csv'
+addressTailxi = '/xt.csv'
+addressTailxr = '/xr.csv'
+
+for signalNum in sigNumList[0:3]:
     #opt.cosetNum=cosetNum
 
-    addressPrefix = 'noisy_data_training_2/snr'
-    addressTails = '/support.csv'
-    addressTailxi = '/xt.csv'
-    addressTailxr = '/xr.csv'
+    stageList = [0]
     supportlst = []
     sendTimelsti = []
     sendTimelstr = []
-    for signalNum in sigNumList:
+    for SNR in SNRList:
         address = addressPrefix + str(SNR) + 'dB/signal_' + str(signalNum) + addressTails
         supportlst.append(np.loadtxt(address, delimiter=','))
         address = addressPrefix + str(SNR) + 'dB/signal_' + str(signalNum) + addressTailxi
         sendTimelsti.append(np.loadtxt(address, delimiter=','))
         address = addressPrefix + str(SNR) + 'dB/signal_' + str(signalNum) + addressTailxr
         sendTimelstr.append(np.loadtxt(address, delimiter=','))
+        stageList.append(stageList[-1]+sendTimelsti[-1].shape[0])
     sendTimelstr = np.concatenate(sendTimelstr, axis=0)
     sendTimelsti = np.concatenate(sendTimelsti, axis=0)
     supportlst = np.concatenate(supportlst, axis=0)
@@ -78,26 +83,23 @@ for SNR in SNRList:
     sendTimei=sendTimelsti
     sendTimer = sendTimelstr
     hlb=[]
+    test=[]
     for cosetNum in range(1,10):
         opt.cosetNum=cosetNum
-        cosets = generateCosets(opt.subBandNum, opt.cosetNum, opt.subBandWidth)
-        recTimei = mulCoset(sendTimei, cosets)
-        recTimer = mulCoset(sendTimer, cosets)
-        recTime=np.concatenate([recTimer,recTimei],axis=1)
-        quantTime, quantStair = quantify(recTime, opt.quantifyLevel)
-        indextr=indexlist
-        recTime2=recTime
-        quantTime2, quantStair = quantify(recTime2, opt.quantifyLevel)
-        indexte= indexlist
-
-
-
 
 
         hl2=[]
-        bestiter=-1
-        besterr=1
-        for i in range(opt.repeatNum):
+        test2=[]
+        for trainSNR in SNRList[5:10]:
+            bestindex=np.loadtxt('modelSNR'+str(trainSNR)+'coset'+str(cosetNum)+'bestiter'+'.txt')
+            bestindex=bestindex.astype(np.int64)
+            cosets = np.loadtxt('modelSNR' + str(trainSNR) + 'coset' + str(cosetNum) + 'iter'+str(bestindex) + '.txt')
+            cosets=cosets.astype(np.int64)
+            recTimei = mulCoset(sendTimei, cosets)
+            recTimer = mulCoset(sendTimer, cosets)
+            recTime = np.concatenate([recTimer, recTimei], axis=1)
+            quantTime, quantStair = quantify(recTime, opt.quantifyLevel)
+            indextr = indexlist
             t1=time.time()
             tf.keras.backend.clear_session()
             model = tf.keras.Sequential([
@@ -108,29 +110,41 @@ for SNR in SNRList:
 
             model.compile(optimizer='adam',
                           loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                        # loss="MSE",
                           metrics=['accuracy'])
-            historyva,historytr,model=conductTrainingCrossentropy(model,opt,quantTime,indextr,quantTime2,indexte)
-            model.save_weights('modelSNR'+str(SNR)+'coset'+str(cosetNum)+'iter'+str(i)+'.h5')
-            np.savetxt('modelSNR'+str(SNR)+'coset'+str(cosetNum)+'iter'+str(i)+'.txt',cosets)
-            pred=model.predict(quantTime2)
+            pred = model.predict(quantTime[0:2,:])
+            model.load_weights('modelSNR' + str(trainSNR) + 'coset' + str(cosetNum) + 'iter'+str(bestindex) + '.h5')
+            pred=model.predict(quantTime)
             pred=np.argmax(pred,-1)
             predres=supbase[pred,:]
             realres=support
-            err = errorRate(predres, realres)
-            fal = falseAlarm(predres, realres)
-            mis = misdetection(predres, realres)
-            det = detectionRate(predres, realres)
+            err = []
+            fal = []
+            det = []
+            test3=[]
+            for testSNR in range(0, len(stageList)-1):
+                ran = range(stageList[testSNR], stageList[testSNR + 1])
+                errt = errorRate(predres[ran, :], realres[ran, :])
+                falt = falseAlarm(predres[ran, :], realres[ran, :])
+                dett = detectionRate(predres[ran, :], realres[ran, :])
+                err.append(errt)
+                fal.append(falt)
+                det.append(dett)
+                test3.append(['signalNum',signalNum,'cosetNum',cosetNum,"trainSNR",trainSNR,'testSNR',testSNR])
+            errt = errorRate(predres, realres)
+            falt = falseAlarm(predres, realres)
+            dett = detectionRate(predres, realres)
+            err.append(errt)
+            fal.append(falt)
+            det.append(dett)
             #need to add evaluation for different num of signals
-            hl2.append([err,fal,mis,det])
+            hl2.append([err,fal,det])
+            test2.append(test3)
             t2=time.time()
             print(t2-t1)
-            if err<besterr:
-                besterr=err
-                bestiter=i
         hlb.append(hl2)
-        np.savetxt('modelSNR'+str(SNR)+'coset'+str(cosetNum)+'bestiter'+'.txt',[bestiter])
+        test.append(test2)
     hla.append(hlb)
+    testroot.append(test)
     hlbt = np.array(hla)
     np.save('testresult'+time.strftime('%Y%m%d%H'),hlbt)
 
